@@ -1,6 +1,6 @@
 ### Скрипт проверяет балансы токенов во всех EVM сетях.
 
-***. Скачать и установить NodeJS**
+Скачать и установить NodeJS
 https://nodejs.org/en
 
 ***Ввести в терминал***
@@ -11,10 +11,10 @@ https://nodejs.org/en
 
 `npm install web3 exceljs`
 
-***Заполнить файлы wallets.txt и networks.txt***
+Заполнить файлы wallets.txt и networks.txt
 
 > RPC берем здесь https://chainlist.org/ или поднимаем свою
 
-***Запустить программу***
+Запустить программу
 
 `node index.js`

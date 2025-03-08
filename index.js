@@ -1,17 +1,16 @@
 const { Web3 } = require('web3');
 const fs = require('fs');
-const ExcelJS = require('exceljs'); // Заменяем xlsx на exceljs
+const ExcelJS = require('exceljs');
 
 // Настройка задержки (в секундах) прямо в коде, можно использовать дробные числа
-const DELAY_MIN = 0.5; // Минимальная задержка в секундах (дробное число)
-const DELAY_MAX = 2.5; // Максимальная задержка в секундах (дробное число)
+const DELAY_MIN = 0.1; // Минимальная задержка в секундах (дробное число)
+const DELAY_MAX = 0.5; // Максимальная задержка в секундах (дробное число)
 
 // Функция для генерации случайной задержки в заданном диапазоне (в секундах)
 function delay(minSeconds, maxSeconds) {
   const timeSeconds = Math.random() * (maxSeconds - minSeconds) + minSeconds;
   const roundedTimeSeconds = parseFloat(timeSeconds.toFixed(2));
   const timeMs = roundedTimeSeconds * 1000; // Конвертируем секунды в миллисекунды
-  console.log(`Задержка: ${roundedTimeSeconds} секунд`);
   return new Promise(resolve => setTimeout(resolve, timeMs));
 }
 
@@ -52,7 +51,6 @@ async function getNativeBalance(web3, wallet) {
     const balance = await web3.eth.getBalance(wallet);
     return web3.utils.fromWei(balance, 'ether');
   } catch (error) {
-    console.error(`Ошибка при получении нативного баланса для ${wallet}:`, error.message);
     return '0';
   }
 }
@@ -64,24 +62,17 @@ async function getTokenBalance(web3, wallet, tokenAddress) {
     const balance = await tokenContract.methods.balanceOf(wallet).call();
     return web3.utils.fromWei(balance, 'ether');
   } catch (error) {
-    console.error(`Ошибка при получении баланса токена ${tokenAddress} для ${wallet}:`, error.message);
     return '0';
   }
 }
 
 // Основная функция для трекинга балансов
 async function trackBalances() {
-  if (wallets.length === 0) {
-    console.log('Список кошельков пуст.');
+  console.log('Скрипт запущен, дождитесь выполнения программы.');
+
+  if (wallets.length === 0 || networks.length === 0) {
     return;
   }
-
-  if (networks.length === 0) {
-    console.log('Список сетей пуст.');
-    return;
-  }
-
-  console.log(`Начинаем проверку балансов (задержка между сетями: ${DELAY_MIN}-${DELAY_MAX} секунд)...\n`);
 
   // Массив для хранения данных для таблицы
   const data = [];
@@ -98,23 +89,19 @@ async function trackBalances() {
 
   // Проверяем балансы для каждого кошелька
   for (const wallet of wallets) {
-    console.log(`Кошелек: ${wallet}`);
     const row = [wallet];
 
     for (const network of networks) {
       const web3 = new Web3(network.rpcUrl);
-      console.log(`Проверка в сети ${network.name}...`);
 
       // Всегда проверяем нативный баланс
       const nativeBalance = await getNativeBalance(web3, wallet);
       row.push(nativeBalance);
-      console.log(`  Нативный баланс (${network.name}): ${nativeBalance}`);
 
       // Если есть токены, проверяем их балансы
       for (const token of network.tokens) {
         const tokenBalance = await getTokenBalance(web3, wallet, token);
         row.push(tokenBalance);
-        console.log(`  Токен ${token} (${network.name}): ${tokenBalance}`);
       }
 
       // Добавляем случайную задержку между проверками сетей
@@ -122,7 +109,6 @@ async function trackBalances() {
     }
 
     data.push(row);
-    console.log('------------------------');
   }
 
   // Создаем новую книгу Excel с помощью ExcelJS

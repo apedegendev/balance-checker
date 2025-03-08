@@ -1,16 +1,14 @@
 const { Web3 } = require('web3');
 const fs = require('fs');
-const XLSX = require('xlsx');
+const ExcelJS = require('exceljs'); // Заменяем xlsx на exceljs
 
 // Настройка задержки (в секундах) прямо в коде, можно использовать дробные числа
-const DELAY_MIN = 0.1; // Минимальная задержка в секундах (дробное число)
-const DELAY_MAX = 0.3; // Максимальная задержка в секундах (дробное число)
+const DELAY_MIN = 0.5; // Минимальная задержка в секундах (дробное число)
+const DELAY_MAX = 2.5; // Максимальная задержка в секундах (дробное число)
 
 // Функция для генерации случайной задержки в заданном диапазоне (в секундах)
 function delay(minSeconds, maxSeconds) {
-  // Генерируем случайное число в диапазоне [minSeconds, maxSeconds]
   const timeSeconds = Math.random() * (maxSeconds - minSeconds) + minSeconds;
-  // Округляем до 2 знаков после запятой для удобства вывода
   const roundedTimeSeconds = parseFloat(timeSeconds.toFixed(2));
   const timeMs = roundedTimeSeconds * 1000; // Конвертируем секунды в миллисекунды
   console.log(`Задержка: ${roundedTimeSeconds} секунд`);
@@ -92,10 +90,7 @@ async function trackBalances() {
 
   // Формируем заголовки для каждой сети
   for (const network of networks) {
-    // Всегда добавляем колонку для нативного баланса
     headers.push(`${network.name} (Native)`);
-
-    // Если есть токены, добавляем колонки для них
     network.tokens.forEach((token, index) => {
       headers.push(`${network.name} Token ${index + 1} (${token})`);
     });
@@ -130,13 +125,20 @@ async function trackBalances() {
     console.log('------------------------');
   }
 
-  // Создаем новую книгу Excel
-  const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Balances');
+  // Создаем новую книгу Excel с помощью ExcelJS
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Balances');
 
-  // Записываем файл
-  XLSX.writeFile(wb, 'balances.xlsx');
+  // Добавляем заголовки
+  worksheet.addRow(headers);
+
+  // Добавляем данные
+  data.forEach(row => {
+    worksheet.addRow(row);
+  });
+
+  // Сохраняем файл
+  await workbook.xlsx.writeFile('balances.xlsx');
   console.log('Данные записаны в balances.xlsx');
 }
 

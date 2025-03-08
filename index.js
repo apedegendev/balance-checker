@@ -4,7 +4,7 @@ const ExcelJS = require('exceljs');
 
 // Настройка задержки (в секундах) прямо в коде, можно использовать дробные числа
 const DELAY_MIN = 0.1; // Минимальная задержка в секундах (дробное число)
-const DELAY_MAX = 0.5; // Максимальная задержка в секундах (дробное число)
+const DELAY_MAX = 0.3; // Максимальная задержка в секундах (дробное число)
 
 // Функция для генерации случайной задержки в заданном диапазоне (в секундах)
 function delay(minSeconds, maxSeconds) {
@@ -81,7 +81,7 @@ async function trackBalances() {
 
   // Формируем заголовки для каждой сети
   for (const network of networks) {
-    headers.push(`${network.name} (Native)`);
+    headers.push(`${network.name} Native`);
     network.tokens.forEach((token, index) => {
       headers.push(`${network.name} Token ${index + 1} (${token})`);
     });
